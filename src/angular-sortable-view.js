@@ -338,7 +338,7 @@
 		};
 	}]);
 
-	module.directive('svElement', ['$parse', function($parse){
+	module.directive('svElement', ['$parse', '$timeout', function($parse, $timeout){
 		return {
 			restrict: 'A',
 			require: ['^svPart', '^svRoot'],
@@ -359,12 +359,12 @@
 				});
 
 				var handle = $element;
-				handle.on('mousedown touchstart', onMousedown);
+				handle.on('mousedown touchstart', onMousedownWrapper);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
-						handle.off('mousedown touchstart', onMousedown);
+						handle.off('mousedown touchstart', onMousedownWrapper);
 						handle = customHandle;
-						handle.on('mousedown touchstart', onMousedown);
+						handle.on('mousedown touchstart', onMousedownWrapper);
 					}
 				});
 
@@ -386,6 +386,13 @@
 				var html = angular.element(document.documentElement);
 
 				var moveExecuted;
+
+				function onMousedownWrapper(e) {
+					$timeout(function()
+					{
+						onMousedown(e);
+					}, 1);
+				}
 
 				function onMousedown(e){
 					touchFix(e);
